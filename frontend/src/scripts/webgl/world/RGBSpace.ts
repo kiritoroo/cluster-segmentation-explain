@@ -269,8 +269,8 @@ export default class RGBSpace {
     const _numPoints = 2;
 
     const _points = [
-      0, 0, 0,
-      0, 0, this.rPlaneWidth
+      0+this.rOffsetStartHorizontal, 0, 0,
+      0+this.rOffsetStartHorizontal, 0, this.rPlaneWidth-this.rOffsetStartHorizontal
     ];
 
     const colors = [];

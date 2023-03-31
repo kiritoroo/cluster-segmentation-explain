@@ -42,7 +42,7 @@ export default class RGBPoints {
     this.pixel_count = this.img_width * this.img_height;
     this.img_rgb = new Uint8ClampedArray(this.pixel_count*3);
 
-    this.img3d_geo = new $.SphereGeometry(0.1, 32, 16);
+    this.img3d_geo = new $.SphereGeometry(0.05, 32, 16);
     this.img3d_mat = new $.MeshBasicMaterial({
       color: 0xffffff,
       side: $.FrontSide

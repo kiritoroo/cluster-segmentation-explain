@@ -2,8 +2,6 @@ import { getImageTexture } from "@/scripts/dip/utils";
 import * as $ from "three";
 import Experience from "@core/Experience";
 import Resources from "@util/Resources";
-import vertex from '@shader/point/vertex.vs.glsl'; 
-import fragment from '@shader/point/fragment.fs.glsl';
 
 export default class RGBPoints {
   private exp: Experience;
@@ -23,9 +21,8 @@ export default class RGBPoints {
 
   private img3d_positions: Array<number>;
   private img3d_colors: Array<number>;
-  private img3d_sizes: Array<number>;
   private img3d_geo: $.BufferGeometry;
-  private img3d_mat: $.ShaderMaterial;
+  private img3d_mat: $.PointsMaterial;
   private img3d_mesh: $.Points;
 
   public group: $.Group;
@@ -47,18 +44,19 @@ export default class RGBPoints {
     this.pixel_count = this.img_width * this.img_height;
     this.img_rgb = new Uint8ClampedArray(this.pixel_count*3);
 
+    const point_mark = this.resources.items['disc_mark'] as $.Texture
+    point_mark.minFilter = $.LinearFilter;
+    point_mark.magFilter = $.LinearFilter;
+    
     this.img3d_positions = [];
     this.img3d_colors = [];
-    this.img3d_sizes = [];
     this.img3d_geo = new $.BufferGeometry();
-    this.img3d_mat = new $.ShaderMaterial({ 
-			uniforms: {
-        color: { value: new $.Color( 0xffffff ) },
-        pointTexture: { value: this.resources.items['disc_mark'] as $.Texture },
-        alphaTest: { value: 0.9 }
-      },
-      vertexShader: vertex,
-      fragmentShader: fragment,
+    this.img3d_mat = new $.PointsMaterial({ 
+      size: 10,
+      sizeAttenuation: false,
+      map: point_mark,
+      alphaTest: 0.9,
+      transparent: true,
       vertexColors: true
     });
     this.img3d_mesh = new $.Points(this.img3d_geo, this.img3d_mat);
@@ -92,12 +90,10 @@ export default class RGBPoints {
 
         this.img3d_positions.push(_r_factor, _b_factor, _g_factor);
         this.img3d_colors.push(_r / 255, _g / 255, _b / 255);
-        this.img3d_sizes.push(1);
       }
     }
 
     this.img3d_geo.setAttribute('position', new $.Float32BufferAttribute(this.img3d_positions, 3));
-    this.img3d_geo.setAttribute('customColor', new $.Float32BufferAttribute(this.img3d_colors, 3));
-    this.img3d_geo.setAttribute( 'size', new $.Float32BufferAttribute(this.img3d_sizes, 1) );
+    this.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(this.img3d_colors, 3));
   }
 }

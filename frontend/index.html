@@ -2,12 +2,38 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="stylesheet" href="./tailwind.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + TS</title>
   </head>
   <body>
-    <div id="app"></div>
+
+
+    <div class="absolute object-contain top-0 right-10 p-5 h-screen z-10">
+      <div class="mx-5 my-auto bg-white shadow-xl px-5 py-8 ">
+        
+        <div class="flex flex-col gap-5 justify-center items-center">
+          <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <img class="rounded-t-lg" src="./public/static/textures/demo3.png" alt="" />
+            <div class="p-5">
+              <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100">500 x 500 (pixel)</span>
+              <h5 class="my-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Original Picture</h5>
+            </div>
+          </div>
+  
+          <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <img class="rounded-t-lg" src="./public/static/textures/demo3.png" alt="" />
+            <div class="p-5">
+              <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-100">500 x 500 (pixel)</span>
+              <h5 class="my-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Segmentation Picture</h5>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

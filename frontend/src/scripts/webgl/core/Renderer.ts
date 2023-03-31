@@ -44,6 +44,8 @@ export default class Renderer {
     _instant.toneMappingExposure = 1.25;
     _instant.setSize(this.size.width, this.size.height);
     _instant.setPixelRatio(this.size.pixelRatio);
+    _instant.localClippingEnabled = true;
+
     return _instant;
   }
 
@@ -61,8 +63,11 @@ export default class Renderer {
   }
 
   public update() {
+    this.renderer.clearDepth();
+
     this.renderer.render(this.scene, this.camera.camera);
     this.labelRenderer.render(this.scene, this.camera.camera);
+    this.renderer.render(this.scene, this.camera.camera);
   }
 
   private debug() {

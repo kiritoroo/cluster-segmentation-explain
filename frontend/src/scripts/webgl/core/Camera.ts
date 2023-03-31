@@ -29,8 +29,8 @@ export default class Camera {
     this.size = this.experience.size;
     this.gui = this.experience.gui;
 
-    this.defaultCameraPosition = new $.Vector3(0, 5, 15);
-    this.defaultSpherical = new $.Spherical(0, 0, 0);
+    this.defaultCameraPosition = new $.Vector3(-18, 15, 26);
+    this.defaultSpherical = new $.Spherical(4, -1.1, 0.5);
     this.camera = this.configCamera();
     this.controls = this.configControls();
     this.enableControls = true;

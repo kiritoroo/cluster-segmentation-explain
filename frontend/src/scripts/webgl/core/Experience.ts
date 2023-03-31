@@ -37,7 +37,7 @@ export default class Experience extends EventEmitter {
     Experience.instance = this;
     
     this.sceneDebugPARAMS = {
-      bgColor: 0x292D3B,
+      bgColor: 0xDEDEDE,
     }
 
     this.clock = new $.Clock();
@@ -57,10 +57,12 @@ export default class Experience extends EventEmitter {
   }
 
   private init() {
-    const axesHelper = new $.AxesHelper(15);
-    const gridHelper = new $.GridHelper(15);
-    this.scene.add(axesHelper);
-    this.scene.add(gridHelper);
+    this.gui.dispose();
+    
+    // const axesHelper = new $.AxesHelper(15);
+    // const gridHelper = new $.GridHelper(15);
+    // this.scene.add(axesHelper);
+    // this.scene.add(gridHelper);
 
     this.resources
       .on('e_resourcesReady', () => {

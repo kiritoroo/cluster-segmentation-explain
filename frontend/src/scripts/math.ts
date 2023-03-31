@@ -42,4 +42,8 @@ Math.mularr = (arr1: Array<number>, arr2: Array<number>): Array<number> => {
   return result;
 }
 
+Math.minMaxScale = (value: number, min: number, max: number, new_min: number, new_max: number): number => {
+  return (value - min) / (max - min) * (new_max - new_min) + new_min
+}
+
 export {};

@@ -1,4 +1,5 @@
 @import './global.scss';
+@import './fonts.scss';
 
 canvas {
   position: absolute;
@@ -77,5 +78,24 @@ canvas {
     transform: scale(1.2, 1.2);
     background: #ffffffb2;
     cursor: help;
+  }
+}
+
+.grid-label {
+  .content {
+    position: absolute;
+    top: -5px;
+    left: -20px;
+    width: 25px;
+    height: 25px;
+    color: #5A5A5A;
+    text-align: center;
+    line-height: 40px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    user-select: none;
+    transform: scale(1, 1);
+    transition: all 0.2s;
   }
 }

@@ -70,16 +70,13 @@ export default class RGBSpace {
   private gAxis: Line2;
   private bAxis: Line2;
 
-  private labelRAxis: HTMLDivElement;
-  private labelRAxisContent: HTMLDivElement;
-  private labelGAxis: HTMLDivElement;
-  private labelGAxisContent: HTMLDivElement;
-  private labelBAxis: HTMLDivElement;
-  private labelBAxisContent: HTMLDivElement;
-
   private meshUIRAxis: ThreeMeshUI.Block;
   private meshUIGAxis: ThreeMeshUI.Block;
   private meshUIBAxis: ThreeMeshUI.Block;
+
+  private labelRGridPoints: Array<THREE.Vector3>;
+  private labelGGridPoints: Array<THREE.Vector3>;
+  private labelBGridPoints: Array<THREE.Vector3>;
 
   constructor() {
     this.exp = new Experience();
@@ -88,6 +85,10 @@ export default class RGBSpace {
     this.rgbPoints = new RGBPoints();
 
     this.group = new $.Group();
+
+    this.labelRGridPoints = [];
+    this.labelGGridPoints = [];
+    this.labelBGridPoints = [];
 
     this.rMaxValue = 255;
     this.rPlaneWidth = 255/10;
@@ -138,9 +139,6 @@ export default class RGBSpace {
     this.gAxis = this.configGAxis();
     this.bAxis = this.configBAxis();
 
-    this.labelRAxis = document.createElement('div');
-    this.labelRAxisContent = document.createElement('div');
-
     this.meshUIRAxis = this.configMeshUIRAxis();
     this.meshUIGAxis = this.configMeshUIGAxis();
     this.meshUIBAxis = this.configMeshUIBAxis();
@@ -159,7 +157,9 @@ export default class RGBSpace {
     this.group.add(this.rGroup, this.gGroup, this.bGroup);
     this.group.position.set(-this.rPlaneWidth/2, 0, -this.rPlaneWidth/2);
 
-    this.configLabelRAxis();
+    this.configLabelRGridPoints();
+    this.configLabelGGridPoints();
+    this.configLabelBGridPoints();
   }
 
   private configRSegments(): $.LineSegments {
@@ -211,8 +211,13 @@ export default class RGBSpace {
 
 
     for (let i = 0; i < this.gNumberSegmentVertical; i++) {
-      _vertices.push(0, i*this.gOffsetSegmentVertical+this.gOffsetStartVertical, 0);
-      _vertices.push(this.gPlaneWidth, i*this.gOffsetSegmentVertical+this.gOffsetStartVertical, 0);
+      const _s = new $.Vector3(0, i*this.gOffsetSegmentVertical+this.gOffsetStartVertical, 0);
+      const _e = new $.Vector3(this.gPlaneWidth, i*this.gOffsetSegmentVertical+this.gOffsetStartVertical, 0);
+
+      _vertices.push(_s.x, _s.y, _s.z);
+      _vertices.push(_e.x, _e.y, _e.z);
+
+      this.labelBGridPoints.push(_e);
     }
 
     this.gVertices = new Float32Array(_vertices);
@@ -249,14 +254,24 @@ export default class RGBSpace {
   private configBSegments(): $.LineSegments {
     const _vertices = []
     for (let i = 0; i < this.bNumberSegmentHorizontal; i++) {
-      _vertices.push(i*this.bOffsetSegmentHorizontal+this.bOffsetStartHorizontal, 0, 0);
-      _vertices.push(i*this.bOffsetSegmentHorizontal+this.bOffsetStartHorizontal, 0, this.bPlaneHeight);
+      const _s = new $.Vector3(i*this.bOffsetSegmentHorizontal+this.bOffsetStartHorizontal, 0, 0);
+      const _e = new $.Vector3(i*this.bOffsetSegmentHorizontal+this.bOffsetStartHorizontal, 0, this.bPlaneHeight);
+
+      _vertices.push(_s.x, _s.y, _s.z);
+      _vertices.push(_e.x, _e.y, _e.z);
+
+      this.labelGGridPoints.push(_e);
     }
 
 
     for (let i = 0; i < this.bNumberSegmentVertical; i++) {
-      _vertices.push(0, 0, i*this.bOffsetSegmentVertical+this.bOffsetStartVertical);
-      _vertices.push(this.bPlaneWidth, 0, i*this.bOffsetSegmentVertical+this.bOffsetStartVertical);
+      const _s = new $.Vector3(0, 0, i*this.bOffsetSegmentVertical+this.bOffsetStartVertical);
+      const _e = new $.Vector3(this.bPlaneWidth, 0, i*this.bOffsetSegmentVertical+this.bOffsetStartVertical);
+      
+      _vertices.push(_s.x, _s.y, _s.z);
+      _vertices.push(_e.x, _e.y, _e.z);
+
+      this.labelRGridPoints.push(_s);
     }
 
     this.bVertices = new Float32Array(_vertices);
@@ -404,34 +419,6 @@ export default class RGBSpace {
     return _instant;
   }
 
-  private configLabelRAxis() {
-    const _point = document.createElement('div');
-    const _hint = document.createElement('div');
-
-    _point.className = 'point';
-    _hint.className = 'hint';
-    this.labelRAxis.className = 'label';
-    this.labelRAxisContent.className = 'content';
-
-    _hint.textContent = 'RAxis';
-    const _content = `
-      <div class="w-max flex flex-col items-center justify-center">
-        <div class="text-xs text-gray-900 dark:text-white">
-          X (Red Axis)
-        </div>
-      </div>
-    `
-    this.labelRAxisContent.style.opacity = "1";
-    this.labelRAxisContent.innerHTML = _content;
-
-    this.labelRAxis.appendChild(_point);
-    this.labelRAxis.appendChild(_hint);
-    this.labelRAxis.appendChild(this.labelRAxisContent);
-
-    const _cssObj = new CSS2DObject(this.labelRAxis);
-    this.rGroup.add(_cssObj);  
-  }
-
   private configMeshUIRAxis(): ThreeMeshUI.Block {
     const _instant = new ThreeMeshUI.Block({
       width: 20,
@@ -454,7 +441,7 @@ export default class RGBSpace {
       -Math.PI / 2, -0.25, 0
     ));
     _instant.rotation.z = -Math.PI/2;
-    _instant.position.set(-1.25, -0.25, this.rPlaneWidth/2);
+    _instant.position.set(-2.25, -0.25, this.rPlaneWidth/2);
 
     return _instant;
   }
@@ -480,7 +467,7 @@ export default class RGBSpace {
     _instant.quaternion.setFromEuler(new $.Euler(
       -Math.PI/2.25, 0, 0
     ));
-    _instant.position.set(this.gPlaneWidth/2, 0, this.gPlaneWidth + 1.25);
+    _instant.position.set(this.gPlaneWidth/2, 0, this.gPlaneWidth + 2.25);
 
     return _instant;
   }
@@ -506,19 +493,91 @@ export default class RGBSpace {
     _instant.quaternion.setFromEuler(new $.Euler(
       0, -Math.PI/2.25, Math.PI/2
     ));
-    _instant.position.set(this.gPlaneWidth, this.rPlaneHeight/2, this.gPlaneWidth + 1.25);
+    _instant.position.set(this.gPlaneWidth, this.rPlaneHeight/2, this.gPlaneWidth + 2.25);
 
     return _instant;
   }
 
+  private configLabelRGridPoints() {
+    const _gridValue = [0, 50, 100, 150, 200, 250];
+    for (let i = 1; i < this.labelRGridPoints.length; i++) {
+      const _content = document.createElement('div');
+      _content.className = 'content';
+      _content.innerHTML = `${_gridValue[i]}`;
+      _content.style.opacity = "1";
+      const _rect = _content.getBoundingClientRect();
+      _content.style.marginLeft = -_rect.width/2 + 'px';
+      _content.style.marginTop = -_rect.height - 20 + 'px';
+      
+      const _divContainer = document.createElement('div');
+      _divContainer.className = 'grid-label';
+      _divContainer.appendChild(_content);
+
+      const _cssObj = new CSS2DObject(_divContainer);
+      _cssObj.position.set(
+        this.labelRGridPoints[i].x,
+        this.labelRGridPoints[i].y,
+        this.labelRGridPoints[i].z
+      );
+
+      this.rGroup.add(_cssObj);  
+    }
+  }
+
+  private configLabelGGridPoints() {
+    const _gridValue = [0, 50, 100, 150, 200, 250];
+    for (let i = 1; i < this.labelGGridPoints.length; i++) {
+      const _content = document.createElement('div');
+      _content.className = 'content';
+      _content.innerHTML = `${_gridValue[i]}`;
+      _content.style.opacity = "1";
+      const _rect = _content.getBoundingClientRect();
+      _content.style.marginLeft = -_rect.width/2 + 'px';
+      _content.style.marginTop = -_rect.height - 20 + 'px';
+      
+      const _divContainer = document.createElement('div');
+      _divContainer.className = 'grid-label';
+      _divContainer.appendChild(_content);
+
+      const _cssObj = new CSS2DObject(_divContainer);
+      _cssObj.position.set(
+        this.labelGGridPoints[i].x,
+        this.labelGGridPoints[i].y,
+        this.labelGGridPoints[i].z + 0.8
+      );
+
+      this.gGroup.add(_cssObj);  
+    }
+  }
+
+  private configLabelBGridPoints() {
+    const _gridValue = [0, 30, 60, 90, 120, 150, 180, 210];
+    for (let i = 1; i < this.labelBGridPoints.length; i++) {
+      const _content = document.createElement('div');
+      _content.className = 'content';
+      _content.innerHTML = `${_gridValue[i]}`;
+      _content.style.opacity = "1";
+      const _rect = _content.getBoundingClientRect();
+      _content.style.marginLeft = -_rect.width/2 + 'px';
+      _content.style.marginTop = -_rect.height - 20 + 'px';
+      
+      const _divContainer = document.createElement('div');
+      _divContainer.className = 'grid-label';
+      _divContainer.appendChild(_content);
+
+      const _cssObj = new CSS2DObject(_divContainer);
+      _cssObj.position.set(
+        this.labelBGridPoints[i].x,
+        this.labelBGridPoints[i].y,
+        this.labelBGridPoints[i].z + + this.gPlaneWidth + 0.8
+      );
+
+      this.bGroup.add(_cssObj);  
+    }
+  }
+
   private bindEvent() {
-    this.labelRAxis.addEventListener("click", () => {
-      if (this.labelRAxisContent.style.opacity=="0") {
-        this.labelRAxisContent.style.opacity = "1";
-      } else {
-        this.labelRAxisContent.style.opacity = "0";
-      }
-    })
+
   }
 
   public update() {

@@ -42,5 +42,6 @@ export default class World {
   
   public update() {
     this.environment.update();
+    this.rgbSpace.update();
   }
 }

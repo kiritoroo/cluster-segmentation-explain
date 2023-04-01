@@ -3,6 +3,11 @@ import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import ThreeMeshUI from 'three-mesh-ui';
+
+import FontJson from '@asset/fonts/poppins/poppins-medium.json';
+import FontImage from '@asset/fonts/poppins/poppins-medium.png';
 
 import Experience from "@core/Experience";
 import Size from "@util/Size";
@@ -65,6 +70,17 @@ export default class RGBSpace {
   private gAxis: Line2;
   private bAxis: Line2;
 
+  private labelRAxis: HTMLDivElement;
+  private labelRAxisContent: HTMLDivElement;
+  private labelGAxis: HTMLDivElement;
+  private labelGAxisContent: HTMLDivElement;
+  private labelBAxis: HTMLDivElement;
+  private labelBAxisContent: HTMLDivElement;
+
+  private meshUIRAxis: ThreeMeshUI.Block;
+  private meshUIGAxis: ThreeMeshUI.Block;
+  private meshUIBAxis: ThreeMeshUI.Block;
+
   constructor() {
     this.exp = new Experience();
     this.size = this.exp.size;
@@ -122,19 +138,28 @@ export default class RGBSpace {
     this.gAxis = this.configGAxis();
     this.bAxis = this.configBAxis();
 
+    this.labelRAxis = document.createElement('div');
+    this.labelRAxisContent = document.createElement('div');
+
+    this.meshUIRAxis = this.configMeshUIRAxis();
+    this.meshUIGAxis = this.configMeshUIGAxis();
+    this.meshUIBAxis = this.configMeshUIBAxis();
+
     this.init();
     this.bindEvent();
   }
 
   private init() {
-    this.rGroup.add(this.rSegments, this.rPlane, this.rAxis);
-    this.gGroup.add(this.gSegments, this.gPlane, this.gAxis);
-    this.bGroup.add(this.bSegments, this.bPlane, this.bAxis);
+    this.rGroup.add(this.rSegments, this.rPlane, this.rAxis, this.meshUIRAxis);
+    this.gGroup.add(this.gSegments, this.gPlane, this.gAxis, this.meshUIGAxis);
+    this.bGroup.add(this.bSegments, this.bPlane, this.bAxis, this.meshUIBAxis);
 
     this.group.add(this.rgbPoints.group);
 
     this.group.add(this.rGroup, this.gGroup, this.bGroup);
     this.group.position.set(-this.rPlaneWidth/2, 0, -this.rPlaneWidth/2);
+
+    this.configLabelRAxis();
   }
 
   private configRSegments(): $.LineSegments {
@@ -167,7 +192,7 @@ export default class RGBSpace {
       new $.PlaneGeometry(this.rPlaneWidth, this.rPlaneHeight, this.rNumberSegmentHorizontal, this.rNumberSegmentVertical),
       new $.MeshBasicMaterial({
         color: 0xEEEEEE,
-        side: $.DoubleSide,
+        side: $.FrontSide,
         transparent: true,
         opacity: 0.2
       })
@@ -210,7 +235,7 @@ export default class RGBSpace {
       new $.PlaneGeometry(this.gPlaneWidth, this.gPlaneHeight, this.gNumberSegmentHorizontal, this.gNumberSegmentVertical),
       new $.MeshBasicMaterial({
         color: 0xEEEEEE,
-        side: $.DoubleSide,
+        side: $.BackSide,
         transparent: true,
         opacity: 0.2
       })
@@ -379,9 +404,124 @@ export default class RGBSpace {
     return _instant;
   }
 
-  private bindEvent() {}
+  private configLabelRAxis() {
+    const _point = document.createElement('div');
+    const _hint = document.createElement('div');
 
-  private update() {
-    
+    _point.className = 'point';
+    _hint.className = 'hint';
+    this.labelRAxis.className = 'label';
+    this.labelRAxisContent.className = 'content';
+
+    _hint.textContent = 'RAxis';
+    const _content = `
+      <div class="w-max flex flex-col items-center justify-center">
+        <div class="text-xs text-gray-900 dark:text-white">
+          X (Red Axis)
+        </div>
+      </div>
+    `
+    this.labelRAxisContent.style.opacity = "1";
+    this.labelRAxisContent.innerHTML = _content;
+
+    this.labelRAxis.appendChild(_point);
+    this.labelRAxis.appendChild(_hint);
+    this.labelRAxis.appendChild(this.labelRAxisContent);
+
+    const _cssObj = new CSS2DObject(this.labelRAxis);
+    this.rGroup.add(_cssObj);  
+  }
+
+  private configMeshUIRAxis(): ThreeMeshUI.Block {
+    const _instant = new ThreeMeshUI.Block({
+      width: 20,
+      height: 2,
+      padding: 0.2,
+      fontFamily: FontJson,
+      fontTexture: FontImage,
+      fontColor: new $.Color(0x535353),
+      backgroundOpacity: 0
+    })
+
+    const _text = new ThreeMeshUI.Text({
+      content: "X Axis (Red Channel)",
+      fontSize: 1
+    })
+
+    _instant.add(_text);
+
+    _instant.quaternion.setFromEuler(new $.Euler(
+      -Math.PI / 2, -0.25, 0
+    ));
+    _instant.rotation.z = -Math.PI/2;
+    _instant.position.set(-1.25, -0.25, this.rPlaneWidth/2);
+
+    return _instant;
+  }
+
+  private configMeshUIGAxis(): ThreeMeshUI.Block {
+    const _instant = new ThreeMeshUI.Block({
+      width: 20,
+      height: 2,
+      padding: 0.2,
+      fontFamily: FontJson,
+      fontTexture: FontImage,
+      fontColor: new $.Color(0x535353),
+      backgroundOpacity: 0
+    })
+
+    const _text = new ThreeMeshUI.Text({
+      content: "Y Axis (Green Channel)",
+      fontSize: 1
+    })
+
+    _instant.add(_text);
+
+    _instant.quaternion.setFromEuler(new $.Euler(
+      -Math.PI/2.25, 0, 0
+    ));
+    _instant.position.set(this.gPlaneWidth/2, 0, this.gPlaneWidth + 1.25);
+
+    return _instant;
+  }
+
+  private configMeshUIBAxis(): ThreeMeshUI.Block {
+    const _instant = new ThreeMeshUI.Block({
+      width: 20,
+      height: 2,
+      padding: 0.2,
+      fontFamily: FontJson,
+      fontTexture: FontImage,
+      fontColor: new $.Color(0x535353),
+      backgroundOpacity: 0
+    })
+
+    const _text = new ThreeMeshUI.Text({
+      content: "Z Axis (Blue Channel)",
+      fontSize: 1
+    })
+
+    _instant.add(_text);
+
+    _instant.quaternion.setFromEuler(new $.Euler(
+      0, -Math.PI/2.25, Math.PI/2
+    ));
+    _instant.position.set(this.gPlaneWidth, this.rPlaneHeight/2, this.gPlaneWidth + 1.25);
+
+    return _instant;
+  }
+
+  private bindEvent() {
+    this.labelRAxis.addEventListener("click", () => {
+      if (this.labelRAxisContent.style.opacity=="0") {
+        this.labelRAxisContent.style.opacity = "1";
+      } else {
+        this.labelRAxisContent.style.opacity = "0";
+      }
+    })
+  }
+
+  public update() {
+    ThreeMeshUI.update();
   }
 }

@@ -7,6 +7,7 @@
       "@type/*": ["src/types/*"],
       "@script/*": ["src/scripts/*"],
       "@shader/*": ["src/shaders/*"],
+      "@asset/*": ["src/assets/*"],
       "@webgl/*": ["src/scripts/webgl/*"],
       "@dip/*": ["src/scripts/dip/*"],
       "@core/*": ["src/scripts/webgl/core/*"],

@@ -13,6 +13,8 @@ export default class KCentroidPoints {
   private pointsMesh: $.InstancedMesh;
   private pointsPosition: Array<$.Vector3>;
 
+  
+
   constructor(pixelsPos: Array<$.Vector3>) {
     this.pixelsPos = pixelsPos;
     this.COLORS = [
@@ -33,7 +35,7 @@ export default class KCentroidPoints {
       color: new $.Color(0xffffff),
       side: $.DoubleSide,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.8,
     });
     this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
     this.pointsPosition = this.initPosForgy();

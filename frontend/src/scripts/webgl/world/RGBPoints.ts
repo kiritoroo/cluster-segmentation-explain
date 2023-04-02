@@ -2,8 +2,6 @@ import { getImageTexture } from "@/scripts/dip/utils";
 import * as $ from "three";
 import Experience from "@core/Experience";
 import Resources from "@util/Resources";
-import vertex from '@shader/point/vertex.vs.glsl'; 
-import fragment from '@shader/point/fragment.fs.glsl';
 
 export default class RGBPoints {
   private exp: Experience;
@@ -25,9 +23,8 @@ export default class RGBPoints {
   public img3d_positions_v3: Array<$.Vector3>;
   private img3d_colors: Array<number>;
   private img3d_colors_v3: Array<$.Vector3>;
-  private img3d_sizes: Array<number>;
   private img3d_geo: $.BufferGeometry;
-  private img3d_mat: $.ShaderMaterial;
+  private img3d_mat: $.PointsMaterial;
   private img3d_mesh: $.Points;
 
   public group: $.Group;
@@ -56,19 +53,15 @@ export default class RGBPoints {
     this.img3d_positions_v3 = [];
     this.img3d_colors = [];
     this.img3d_colors_v3 = [];
-    this.img3d_sizes = [];
     this.img3d_geo = new $.BufferGeometry();
-    this.img3d_mat = new $.ShaderMaterial({ 
-			uniforms: {
-        color: { value: new $.Color( 0xffffff ) },
-        pointTexture: { value: this.resources.items['disc_mark'] as $.Texture },
-        alphaTest: { value: 0.2 }
-      },
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      vertexColors: true,
+    this.img3d_mat = new $.PointsMaterial({ 
+      size: 10,
+      sizeAttenuation: false,
+      map: point_mark,
+      alphaTest: 0.9,
       transparent: true,
-      opacity: 0.2
+      vertexColors: true,
+      opacity: 1
     });
     this.img3d_mesh = new $.Points(this.img3d_geo, this.img3d_mat);
     
@@ -79,18 +72,31 @@ export default class RGBPoints {
 
   private init() {
     this.configData();
-    this.setPixelsColor(100/255);
+    this.setPixelsColorDefault();
 
     this.group.add(this.img3d_mesh);
   }
 
-  public setPixelsColor(value: number) {
-    const _colors = new Array(this.img_height * this.img_width * 3).fill(value);
-    this.img3d_geo.setAttribute('customColor', new $.Float32BufferAttribute(_colors, 3));
+  public setPixelsColorDefault() {
+    const _colors = new Array(this.img_height * this.img_width * 3).fill(200/255);
+    this.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
+
+    this.img3d_mat.alphaTest = 0.3;
+    this.img3d_mat.opacity = 0.3;
+  }
+
+  public setPixelsOpcacity(value: number) {
+    this.img3d_mat.opacity = value;
+  }
+
+  public setPixelsColors() {
+    this.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(this.img3d_colors, 3));
+  
+    this.img3d_mat.alphaTest = 0.9;
+    this.img3d_mat.opacity = 1;
   }
 
   private configData() {
-    this.img3d_sizes = new Array(this.img_width * this.img_height).fill(200);
     for (let y = 0; y < this.img_height; y++) {
       for (let x = 0; x < this.img_width; x++) {
         const _index = (y * this.img_width + x);
@@ -114,7 +120,6 @@ export default class RGBPoints {
     }
 
     this.img3d_geo.setAttribute('position', new $.Float32BufferAttribute(this.img3d_positions, 3));
-    this.img3d_geo.setAttribute('customColor', new $.Float32BufferAttribute(this.img3d_colors, 3));
-    this.img3d_geo.setAttribute('customSize', new $.Float32BufferAttribute(this.img3d_sizes, 1));
+    this.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(this.img3d_colors, 3));
   }
 }

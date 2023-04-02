@@ -45,6 +45,7 @@ export default class Renderer {
     _instant.setSize(this.size.width, this.size.height);
     _instant.setPixelRatio(this.size.pixelRatio);
     _instant.localClippingEnabled = true;
+    _instant.domElement.id = "main-canvas";
 
     return _instant;
   }

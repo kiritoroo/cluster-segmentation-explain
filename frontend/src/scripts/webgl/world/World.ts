@@ -12,6 +12,8 @@ export default class World {
   public environment: Environment;
   public rgbSpace: RGBSpace;
 
+  public ui_button_kmeanPlay: HTMLButtonElement;
+
   constructor() {
     this.experience = new Experience();
     this.scene = this.experience.scene;
@@ -19,6 +21,8 @@ export default class World {
     this.world = new $.Group();
     this.environment = new Environment();
     this.rgbSpace = new RGBSpace();
+
+    this.ui_button_kmeanPlay = document.getElementById('button-kmean-play') as HTMLButtonElement;
 
     this.init();
     this.bindEvent();
@@ -33,7 +37,9 @@ export default class World {
   }
 
   private bindEvent() {
-
+    this.ui_button_kmeanPlay.addEventListener("click", (event: any) => {
+      this.rgbSpace.kMeansLoop();
+    })
   }
 
   public resize() {

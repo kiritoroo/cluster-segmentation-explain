@@ -71,6 +71,10 @@ export default class RGBSpace {
   private labelGGridPoints: Array<THREE.Vector3>;
   private labelBGridPoints: Array<THREE.Vector3>;
 
+  private kmeanCanvas: HTMLCanvasElement;
+
+  public kmeanTimeout: Array<number>;
+
   constructor() {
     this.rgbPoints = new RGBPoints();
     this.kCentroidPoints = new KCentroidPoints(this.rgbPoints.img3d_positions_v3);
@@ -131,6 +135,11 @@ export default class RGBSpace {
     this.meshUIGAxis = this.configMeshUIGAxis();
     this.meshUIBAxis = this.configMeshUIBAxis();
 
+    this.kmeanCanvas = document.getElementById('kmean-canvas') as HTMLCanvasElement;
+
+    this.kmeanSpeed = 2;
+    this.kmeanTimeout = [];
+
     this.init();
     this.bindEvent();
   }
@@ -149,6 +158,126 @@ export default class RGBSpace {
     this.configLabelRGridPoints();
     this.configLabelGGridPoints();
     this.configLabelBGridPoints();
+  }
+
+  public kMeans() {
+    const _colors = new Array(this.rgbPoints.img_height * this.rgbPoints.img_width * 3).fill(245/255);
+    for (let p = 0; p < this.rgbPoints.pixel_count; p++) {
+      this.kmeanTimeout.push(setTimeout(() => {
+        let _minDistance = 99999;
+        let _closestCentroidIndex = 0;
+
+        for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
+          this.kmeanTimeout.push(setTimeout(() => {
+            const _distance = this.rgbPoints.img3d_positions_v3[p].distanceTo(this.kCentroidPoints.pointsPosition[k]);
+            if (_distance < _minDistance) {
+              _minDistance = _distance;
+              _closestCentroidIndex = k;
+            }
+          }, 1));
+        }
+
+        this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].push(this.rgbPoints.img3d_positions_v3[p])
+
+        _colors[p * 3] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].r;
+        _colors[p * 3 + 1] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].g;
+        _colors[p * 3 + 2] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].b;
+      
+        this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
+        this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
+
+        // const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
+        //   .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+        //   .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
+
+        // this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
+      }, 1));
+    }
+    this.draw2Canvas(_colors, this.kmeanCanvas);
+  }
+
+  public kMeansLoop() {
+    let _maxIteration = 3;
+    let _iteration = 0;
+    let _hasChanged = true;
+
+    for (; _iteration < _maxIteration; _iteration++) {
+      // this.kmeanTimeout.push(setTimeout(() => {
+        _hasChanged = false;
+        this.kCentroidPoints.initPixelsChildPos();
+        const _colors = new Array(this.rgbPoints.img_height * this.rgbPoints.img_width * 3).fill(245/255);
+
+        for (let p = 0; p < this.rgbPoints.pixel_count; p++) {
+          // this.kmeanTimeout.push(setTimeout(() => {
+            let _minDistance = 99999;
+            let _closestCentroidIndex = 0;
+    
+            for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
+              // this.kmeanTimeout.push(setTimeout(() => {
+                const _distance = this.rgbPoints.img3d_positions_v3[p].distanceTo(this.kCentroidPoints.pointsPosition[k]);
+                if (_distance < _minDistance) {
+                  _minDistance = _distance;
+                  _closestCentroidIndex = k;
+                }
+              // }, 1));
+            }
+    
+            this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].push(this.rgbPoints.img3d_positions_v3[p])
+    
+            _colors[p * 3] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].r;
+            _colors[p * 3 + 1] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].g;
+            _colors[p * 3 + 2] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].b;
+          
+            this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
+            this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
+          // }, 1));
+        }
+
+        for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
+          // this.kmeanTimeout.push(setTimeout(() => {
+            const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[k]
+              .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+              .divideScalar(this.kCentroidPoints.pixelsChildPos[k].length);
+
+            if (_centroidNewPos.equals(this.kCentroidPoints.pointsPosition[k])) {
+              _hasChanged = false;
+            } else {
+              this.kCentroidPoints.setCentroidPos(_centroidNewPos, k);
+              _hasChanged = true;
+            }
+          // }, 1));
+        }
+
+        this.draw2Canvas(_colors, this.kmeanCanvas);
+        console.log(_iteration)
+        if (!_hasChanged) return;
+      // }, 1));
+    }
+    console.log("done")
+  }
+
+  public draw2Canvas(matrix: Array<number>, canvas: HTMLCanvasElement) {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+  
+    const cellSize = Math.min(canvas.width / this.rgbPoints.img_width, canvas.height / this.rgbPoints.img_height);
+  
+    for (let i = 0; i < matrix.length; i += 3) {
+        const r = matrix[i] * 255;
+        const g = matrix[i + 1] * 255;  
+        const b = matrix[i + 2] * 255;
+
+        const x = i / 3 % this.rgbPoints.img_width;
+        const y = Math.floor(i / 3 / this.rgbPoints.img_width);
+
+        const color = `rgb(${r},${g},${b})`;
+        ctx.fillStyle = color;
+        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+    }
   }
 
   private configRSegments(): $.LineSegments {

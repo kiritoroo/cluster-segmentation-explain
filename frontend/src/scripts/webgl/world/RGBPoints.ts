@@ -14,16 +14,16 @@ export default class RGBPoints {
   private img_texture: $.Texture;
   private img_data: ImageData;
   private img_rgba: Uint8ClampedArray;
-  private img_width: number;
-  private img_height: number;
-  private pixel_count: number;
+  public img_width: number;
+  public img_height: number;
+  public pixel_count: number;
   private img_rgb: Uint8ClampedArray;
 
-  private img3d_positions: Array<number>;
+  public img3d_positions: Array<number>;
   public img3d_positions_v3: Array<$.Vector3>;
-  private img3d_colors: Array<number>;
+  public img3d_colors: Array<number>;
   private img3d_colors_v3: Array<$.Vector3>;
-  private img3d_geo: $.BufferGeometry;
+  public img3d_geo: $.BufferGeometry;
   private img3d_mat: $.PointsMaterial;
   private img3d_mesh: $.Points;
 
@@ -38,7 +38,7 @@ export default class RGBPoints {
     this.resources = this.exp.resources;
 
     this.img_texture = this.resources.items['demo'] as $.Texture;
-    this.img_data = getImageTexture(this.img_texture.image, 1);
+    this.img_data = getImageTexture(this.img_texture.image, 0.3);
     this.img_rgba = this.img_data.data;
     this.img_width = this.img_data.width;
     this.img_height = this.img_data.height;

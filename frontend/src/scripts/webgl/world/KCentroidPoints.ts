@@ -7,12 +7,13 @@ export default class KCentroidPoints {
   public group: $.Group;
 
   private pixelsPos: Array<$.Vector3>;
-  private pointNumber: number;
-  private pointsColor: Array<$.Color>;
+  public pointNumber: number;
+  public pointsColor: Array<$.Color>;
   private pointGeometry: $.SphereGeometry;
   private pointMaterial: $.MeshBasicMaterial;
   private pointsMesh: $.InstancedMesh;
-  private pointsPosition: Array<$.Vector3>;
+  public pointsPosition: Array<$.Vector3>;
+  public pixelsChildPos: Array<Array<$.Vector3>>;
 
   private pointsLabelObj: Array<CSS2DObject>;
 
@@ -41,6 +42,7 @@ export default class KCentroidPoints {
     this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
     this.pointsPosition = this.initPosForgy();
     this.pointsLabelObj = this.initLabelsObj();
+    this.pixelsChildPos = this.initPixelsChildPos();
 
     this.init();
   }
@@ -89,6 +91,17 @@ export default class KCentroidPoints {
 
   public changeNumberPoins() {}
 
+  public setCentroidPos(pos: $.Vector3, centroidIndex: number) {
+    this.pointsPosition[centroidIndex] = pos;
+
+    const _matrix = new $.Matrix4();
+    _matrix.setPosition(pos.x, pos.y, pos.z);
+    this.pointsMesh.setMatrixAt(centroidIndex, _matrix);
+    this.pointsMesh.instanceMatrix!.needsUpdate = true;
+
+    this.pointsLabelObj[centroidIndex].position.set(pos.x, pos.y, pos.z);
+  }
+
   private initColors(): Array<$.Color> {
     const _instant = Math.randSample(this.COLORS, this.pointNumber);
     return _instant;
@@ -113,8 +126,8 @@ export default class KCentroidPoints {
       this.pointsMesh.setColorAt(i, _color);    
     }
 
-    this.pointsMesh.instanceColor!.needsUpdate = true;
     this.pointsMesh.instanceMatrix!.needsUpdate = true;
+    this.pointsMesh.instanceColor!.needsUpdate = true;
   }
 
   private initLabelsObj() {
@@ -152,6 +165,15 @@ export default class KCentroidPoints {
         this.pointsPosition[i].z
       )
       _instant.push(_cssObj);
+    }
+
+    return _instant;
+  }
+
+  public initPixelsChildPos() {
+    const _instant = []
+    for (let i = 0; i < this.pointNumber; i++) {
+      _instant.push([]);
     }
 
     return _instant;

@@ -1,4 +1,5 @@
 import * as $ from "three";
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 export default class KCentroidPoints {
   private COLORS: Array<$.Color>;
@@ -13,7 +14,7 @@ export default class KCentroidPoints {
   private pointsMesh: $.InstancedMesh;
   private pointsPosition: Array<$.Vector3>;
 
-  
+  private pointsLabelObj: Array<CSS2DObject>;
 
   constructor(pixelsPos: Array<$.Vector3>) {
     this.pixelsPos = pixelsPos;
@@ -39,7 +40,8 @@ export default class KCentroidPoints {
     });
     this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
     this.pointsPosition = this.initPosForgy();
-    
+    this.pointsLabelObj = this.initLabelsObj();
+
     this.init();
   }
 
@@ -77,10 +79,12 @@ export default class KCentroidPoints {
 
   public addToSpace() {
     this.group.add(this.pointsMesh);
+    this.group.add(...this.pointsLabelObj);
   }
 
   public removeFromSpace() {
     this.group.remove(this.pointsMesh);
+    this.group.remove(...this.pointsLabelObj);
   }
 
   public changeNumberPoins() {}
@@ -111,5 +115,45 @@ export default class KCentroidPoints {
 
     this.pointsMesh.instanceColor!.needsUpdate = true;
     this.pointsMesh.instanceMatrix!.needsUpdate = true;
+  }
+
+  private initLabelsObj() {
+    const _instant = [];
+    for (let i = 0; i < this.pointNumber; i++) {
+      const _label = document.createElement('div');
+      const _point = document.createElement('div');
+      const _hint = document.createElement('div');
+      const _content = document.createElement('div');
+  
+      _point.className = 'point';
+      _point.style.borderColor = "#" + this.pointsColor[i].getHexString();
+      _hint.className = 'hint';
+      _label.className = 'label';
+      _content.className = 'content';
+  
+      _hint.textContent = `Cluster ${i}`;
+      _content.innerHTML = `
+        <div class="w-max flex flex-col items-center justify-center">
+          <div class="text-xs text-gray-900 dark:text-white">
+            Cluster ${i}
+          </div>
+        </div>
+      `
+      _content.style.opacity = "0";
+  
+      _label.appendChild(_point);
+      _label.appendChild(_hint);
+      _label.appendChild(_content);
+  
+      const _cssObj = new CSS2DObject(_label);
+      _cssObj.position.set(
+        this.pointsPosition[i].x,
+        this.pointsPosition[i].y,
+        this.pointsPosition[i].z
+      )
+      _instant.push(_cssObj);
+    }
+
+    return _instant;
   }
 }

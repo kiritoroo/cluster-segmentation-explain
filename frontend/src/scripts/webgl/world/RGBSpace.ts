@@ -1,5 +1,4 @@
 import * as $ from "three";
-import { MeshLine, MeshLineMaterial } from 'three.meshline';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
@@ -9,19 +8,15 @@ import ThreeMeshUI from 'three-mesh-ui';
 import FontJson from '@asset/fonts/poppins/poppins-medium.json';
 import FontImage from '@asset/fonts/poppins/poppins-medium.png';
 
-import Experience from "@core/Experience";
-import Size from "@util/Size";
 import RGBPoints from "@world/RGBPoints";
+import KCentroidPoints from "@world/KCentroidPoints";
 
 export default class RGBSpace {
-  private exp: Experience;
-  private size: Size;
-
   public rgbPoints: RGBPoints;
+  public kCentroidPoints: KCentroidPoints;
 
   public group: $.Group;
 
-  private rMaxValue: number;
   private rPlaneWidth: number;
   private rPlaneHeight: number;
   private rNumberSegmentHorizontal: number;
@@ -36,7 +31,6 @@ export default class RGBSpace {
   private rPlane: $.Mesh;
   private rGroup: $.Group;
 
-  private gMaxValue: number;
   private gPlaneWidth: number;
   private gPlaneHeight: number;
   private gNumberSegmentHorizontal: number;
@@ -51,7 +45,6 @@ export default class RGBSpace {
   private gPlane: $.Mesh;
   private gGroup: $.Group;
 
-  private bMaxValue: number;
   private bPlaneWidth: number;
   private bPlaneHeight: number;
   private bNumberSegmentHorizontal: number;
@@ -79,10 +72,8 @@ export default class RGBSpace {
   private labelBGridPoints: Array<THREE.Vector3>;
 
   constructor() {
-    this.exp = new Experience();
-    this.size = this.exp.size;
-
     this.rgbPoints = new RGBPoints();
+    this.kCentroidPoints = new KCentroidPoints(this.rgbPoints.img3d_positions_v3);
 
     this.group = new $.Group();
 
@@ -90,7 +81,6 @@ export default class RGBSpace {
     this.labelGGridPoints = [];
     this.labelBGridPoints = [];
 
-    this.rMaxValue = 255;
     this.rPlaneWidth = 255/10;
     this.rPlaneHeight = 180/10;
     this.rNumberSegmentHorizontal = 6;
@@ -105,7 +95,6 @@ export default class RGBSpace {
     this.rPlane = this.configRPlane();
     this.rGroup = new $.Group();
 
-    this.gMaxValue = 255;
     this.gPlaneWidth = 255/10;
     this.gPlaneHeight = 180/10;
     this.gNumberSegmentHorizontal = 6;
@@ -120,7 +109,6 @@ export default class RGBSpace {
     this.gPlane = this.configGPlane();
     this.gGroup = new $.Group();
 
-    this.bMaxValue = 255;
     this.bPlaneWidth = 255/10;
     this.bPlaneHeight = 255/10;
     this.bNumberSegmentHorizontal = 6;
@@ -153,6 +141,7 @@ export default class RGBSpace {
     this.bGroup.add(this.bSegments, this.bPlane, this.bAxis, this.meshUIBAxis);
 
     this.group.add(this.rgbPoints.group);
+    this.group.add(this.kCentroidPoints.group);
 
     this.group.add(this.rGroup, this.gGroup, this.bGroup);
     this.group.position.set(-this.rPlaneWidth/2, 0, -this.rPlaneWidth/2);

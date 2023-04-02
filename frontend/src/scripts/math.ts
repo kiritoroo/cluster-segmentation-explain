@@ -46,4 +46,9 @@ Math.minMaxScale = (value: number, min: number, max: number, new_min: number, ne
   return (value - min) / (max - min) * (new_max - new_min) + new_min
 }
 
+Math.randSample = (list: Array<any>, count: number) => {
+  const shuffled = list.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
 export {};

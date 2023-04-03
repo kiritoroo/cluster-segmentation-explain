@@ -28,6 +28,11 @@ export default class KCentroidPoints {
       new $.Color(0x78d2d3),
       new $.Color(0x97daaf),
       new $.Color(0xcce3ab),
+      
+      new $.Color(0xF68B7D),
+      new $.Color(0xFDDE99),
+      new $.Color(0xD0E6A9),
+      new $.Color(0x90E3CF),
     ];
 
     this.group = new $.Group();

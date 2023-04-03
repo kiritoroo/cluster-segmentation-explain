@@ -138,7 +138,7 @@ export default class RGBSpace {
 
     this.kmeanCanvas = document.getElementById('kmean-canvas') as HTMLCanvasElement;
 
-    this.kmeanSpeed = 0;
+    this.kmeanSpeed = 0.5;
     this.kmeanTimeout = [];
 
     this.init();
@@ -258,10 +258,9 @@ export default class RGBSpace {
             // }, 1));
           }
           this.draw2Canvas(_colors, this.kmeanCanvas)
-        }
-        );
+          if (!_hasChanged) return;
+        });
         
-        if (!_hasChanged) return;
       }, _iteration * this.rgbPoints.pixel_count * this.kmeanSpeed * 1.15));
     }
     console.log("done")

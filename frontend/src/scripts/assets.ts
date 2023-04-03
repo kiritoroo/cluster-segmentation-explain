@@ -6,7 +6,7 @@ export const assets: Array<TAsset> = [
   {
     name: "demo",
     type: "texture",
-    path: TEXTURE_URL + "demo3.png",
+    path: TEXTURE_URL + "demo.webp",
   },
   {
     name: "disc_mark",

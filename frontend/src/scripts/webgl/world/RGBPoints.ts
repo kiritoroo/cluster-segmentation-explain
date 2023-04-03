@@ -72,7 +72,7 @@ export default class RGBPoints {
 
   private init() {
     this.configData();
-    this.setPixelsColorDefault();
+    // this.setPixelsColorDefault();
 
     this.group.add(this.img3d_mesh);
   }

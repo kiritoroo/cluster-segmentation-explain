@@ -38,7 +38,7 @@ export default class World {
 
   private bindEvent() {
     this.ui_button_kmeanPlay.addEventListener("click", (event: any) => {
-      this.rgbSpace.kMeansLoop();
+      this.rgbSpace.kMeansLoop(20);
     })
   }
 

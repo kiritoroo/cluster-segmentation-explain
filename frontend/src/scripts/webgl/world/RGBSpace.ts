@@ -138,7 +138,7 @@ export default class RGBSpace {
 
     this.kmeanCanvas = document.getElementById('kmean-canvas') as HTMLCanvasElement;
 
-    this.kmeanSpeed = 1.05;
+    this.kmeanSpeed = 0;
     this.kmeanTimeout = [];
 
     this.init();
@@ -195,8 +195,7 @@ export default class RGBSpace {
     this.draw2Canvas(_colors, this.kmeanCanvas);
   }
 
-  public kMeansLoop() {
-    let _maxIteration = 5;
+  public kMeansLoop(_maxIteration: number) {
     let _iteration = 0;
     let _hasChanged = true;
     let _timeoutPromies: Array<Promise<void>> = [];
@@ -233,21 +232,36 @@ export default class RGBSpace {
               this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
               this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
   
-              const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
-                .reduce((acc, cur) => acc.add(cur), new $.Vector3())
-                .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
+              // const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
+              //   .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+              //   .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
       
-              this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
+              // this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
               resolve();
             }, p*this.kmeanSpeed));
           }))
         }
 
-        await Promise.all(_timeoutPromies).then(() =>
+        await Promise.all(_timeoutPromies).then(() => {
+          for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
+            // this.kmeanTimeout.push(setTimeout(() => {
+              const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[k]
+                .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+                .divideScalar(this.kCentroidPoints.pixelsChildPos[k].length);
+
+              if (_centroidNewPos.equals(this.kCentroidPoints.pointsPosition[k])) {
+                _hasChanged = false;
+              } else {
+                this.kCentroidPoints.setCentroidPos(_centroidNewPos, k);
+                _hasChanged = true;
+              }
+            // }, 1));
+          }
           this.draw2Canvas(_colors, this.kmeanCanvas)
+        }
         );
         
-        // if (!_hasChanged) return;
+        if (!_hasChanged) return;
       }, _iteration * this.rgbPoints.pixel_count * this.kmeanSpeed * 1.15));
     }
     console.log("done")
@@ -258,8 +272,8 @@ export default class RGBSpace {
     canvas.height = canvas.offsetHeight;
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    // ctx.translate(canvas.width, 0);
+    // ctx.scale(-1, 1);
   
     const cellSize = Math.min(canvas.width / this.rgbPoints.img_width, canvas.height / this.rgbPoints.img_height);
   

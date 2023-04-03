@@ -20,6 +20,9 @@
     "declarationMap": true,
     "declarationDir": "./types/*",
   },
+  "ts-node": {
+    "esm": true
+  },
   "include": [ "src", "**/*.d.ts" ],
   "exclude": ["node_modules"],
   "extends": "./tsconfig.paths.json",

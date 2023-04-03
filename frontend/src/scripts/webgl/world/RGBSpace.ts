@@ -78,7 +78,7 @@ export default class RGBSpace {
 
   constructor() {
     this.rgbPoints = new RGBPoints();
-    this.kCentroidPoints = new KCentroidPoints(5, this.rgbPoints.img3d_positions_v3);
+    this.kCentroidPoints = new KCentroidPoints(3, this.rgbPoints.img3d_positions_v3);
 
     this.group = new $.Group();
 

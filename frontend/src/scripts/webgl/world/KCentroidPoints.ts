@@ -45,7 +45,7 @@ export default class KCentroidPoints {
       opacity: 0.8,
     });
     this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
-    this.pointsPosition = this.initPosForgy();
+    this.pointsPosition = this.initPosPlusPlus();
     this.pointsLabelObj = this.initLabelsObj();
     this.pixelsChildPos = this.initPixelsChildPos();
 
@@ -82,7 +82,63 @@ export default class KCentroidPoints {
     return _instant;
   }
 
-  public initPosPlus() {}
+  public initPosPlusPlus() {
+    const _instant = [];
+
+    const getDistance = (pointA: $.Vector3, pointB: $.Vector3): number => {
+      return pointA.distanceTo(pointB);
+    }
+
+    const getNearestCentroidPos= (pointPos:  $.Vector3): $.Vector3 => {
+      let _nearestCentroid = _centroids[0];
+      let _minDistance = getDistance(pointPos, _nearestCentroid);
+
+      for (const centroid of _centroids.slice(1)) {
+        const _distance = getDistance(pointPos, centroid);
+        if (_distance < _minDistance) {
+          _nearestCentroid = centroid;
+          _minDistance = _distance;
+        }
+      }
+      return _nearestCentroid;
+    }
+
+    const _centroids: $.Vector3[] = [];
+    _centroids.push(this.pixelsPos[Math.floor(Math.random() * this.pixelsPos.length)])
+
+    while (_centroids.length < this.pointNumber) {
+      const _distances: number[] = [];
+      let _totalDistance = 0;
+      let _maxPointPos: $.Vector3 = this.pixelsPos[0];
+      let _maxDistance: number = getDistance(_maxPointPos, getNearestCentroidPos(_maxPointPos));
+
+      for (const pointPos of this.pixelsPos) {
+        const _nearestCentroid= getNearestCentroidPos(pointPos);
+        const _distance = getDistance(pointPos, _nearestCentroid);
+        _distances.push(_distance);
+        _totalDistance += _distance;
+
+        if (_distance > _maxDistance) {
+          _maxDistance = _distance;
+          _maxPointPos = pointPos;
+        }
+      }
+
+      _centroids.push(_maxPointPos);
+
+      // let _randValue = Math.random() * _totalDistance;
+
+      // for (let i = 0; i < _distances.length; i++) {
+      //   _randValue -= _distances[i];
+      //   if (_randValue < 0) {
+      //     _centroids.push(this.pixelsPos[i])
+      //     break;
+      //   }
+      // }
+    }
+
+    return _centroids;
+  }
 
   public addToSpace() {
     this.group.add(this.pointsMesh);

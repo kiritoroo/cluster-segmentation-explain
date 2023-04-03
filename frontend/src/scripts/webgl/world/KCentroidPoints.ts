@@ -17,7 +17,8 @@ export default class KCentroidPoints {
 
   private pointsLabelObj: Array<CSS2DObject>;
 
-  constructor(pixelsPos: Array<$.Vector3>) {
+  constructor(numberCentroid: number, pixelsPos: Array<$.Vector3>) {
+    this.pointNumber = numberCentroid;
     this.pixelsPos = pixelsPos;
     this.COLORS = [
       new $.Color(0xf5bbba),
@@ -30,7 +31,6 @@ export default class KCentroidPoints {
     ];
 
     this.group = new $.Group();
-    this.pointNumber = 3;
     this.pointsColor = this.initColors();
     this.pointGeometry = new $.SphereGeometry(0.5, 32, 16);
     this.pointMaterial = new $.MeshBasicMaterial({

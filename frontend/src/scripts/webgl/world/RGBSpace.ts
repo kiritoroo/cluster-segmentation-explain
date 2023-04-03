@@ -73,11 +73,12 @@ export default class RGBSpace {
 
   private kmeanCanvas: HTMLCanvasElement;
 
-  public kmeanTimeout: Array<number>;
+  private kmeanTimeout: Array<number>;
+  private kmeanSpeed: number;
 
   constructor() {
     this.rgbPoints = new RGBPoints();
-    this.kCentroidPoints = new KCentroidPoints(this.rgbPoints.img3d_positions_v3);
+    this.kCentroidPoints = new KCentroidPoints(5, this.rgbPoints.img3d_positions_v3);
 
     this.group = new $.Group();
 
@@ -137,7 +138,7 @@ export default class RGBSpace {
 
     this.kmeanCanvas = document.getElementById('kmean-canvas') as HTMLCanvasElement;
 
-    this.kmeanSpeed = 2;
+    this.kmeanSpeed = 1.05;
     this.kmeanTimeout = [];
 
     this.init();
@@ -168,13 +169,11 @@ export default class RGBSpace {
         let _closestCentroidIndex = 0;
 
         for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
-          this.kmeanTimeout.push(setTimeout(() => {
             const _distance = this.rgbPoints.img3d_positions_v3[p].distanceTo(this.kCentroidPoints.pointsPosition[k]);
             if (_distance < _minDistance) {
               _minDistance = _distance;
               _closestCentroidIndex = k;
             }
-          }, 1));
         }
 
         this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].push(this.rgbPoints.img3d_positions_v3[p])
@@ -186,72 +185,70 @@ export default class RGBSpace {
         this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
         this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
 
-        // const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
-        //   .reduce((acc, cur) => acc.add(cur), new $.Vector3())
-        //   .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
+        const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
+          .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+          .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
 
-        // this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
-      }, 1));
+        this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
+      }, p*this.kmeanSpeed));
     }
     this.draw2Canvas(_colors, this.kmeanCanvas);
   }
 
   public kMeansLoop() {
-    let _maxIteration = 3;
+    let _maxIteration = 5;
     let _iteration = 0;
     let _hasChanged = true;
+    let _timeoutPromies: Array<Promise<void>> = [];
 
     for (; _iteration < _maxIteration; _iteration++) {
-      // this.kmeanTimeout.push(setTimeout(() => {
+      this.kmeanTimeout.push(setTimeout(async () => {
         _hasChanged = false;
         this.kCentroidPoints.initPixelsChildPos();
         const _colors = new Array(this.rgbPoints.img_height * this.rgbPoints.img_width * 3).fill(245/255);
-
+        _timeoutPromies = [];
+  
         for (let p = 0; p < this.rgbPoints.pixel_count; p++) {
-          // this.kmeanTimeout.push(setTimeout(() => {
-            let _minDistance = 99999;
-            let _closestCentroidIndex = 0;
-    
-            for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
-              // this.kmeanTimeout.push(setTimeout(() => {
-                const _distance = this.rgbPoints.img3d_positions_v3[p].distanceTo(this.kCentroidPoints.pointsPosition[k]);
-                if (_distance < _minDistance) {
-                  _minDistance = _distance;
-                  _closestCentroidIndex = k;
-                }
-              // }, 1));
-            }
-    
-            this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].push(this.rgbPoints.img3d_positions_v3[p])
-    
-            _colors[p * 3] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].r;
-            _colors[p * 3 + 1] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].g;
-            _colors[p * 3 + 2] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].b;
-          
-            this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
-            this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
-          // }, 1));
+          _timeoutPromies.push(new Promise<void>((resolve, reject) => {
+            this.kmeanTimeout.push(setTimeout(() => {
+              let _minDistance = 99999;
+              let _closestCentroidIndex = 0;
+      
+              for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
+                // this.kmeanTimeout.push(setTimeout(() => {
+                  const _distance = this.rgbPoints.img3d_positions_v3[p].distanceTo(this.kCentroidPoints.pointsPosition[k]);
+                  if (_distance < _minDistance) {
+                    _minDistance = _distance;
+                    _closestCentroidIndex = k;
+                  }
+                // }, 1));
+              }
+      
+              this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].push(this.rgbPoints.img3d_positions_v3[p])
+      
+              _colors[p * 3] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].r;
+              _colors[p * 3 + 1] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].g;
+              _colors[p * 3 + 2] = this.kCentroidPoints.pointsColor[_closestCentroidIndex].b;
+            
+              this.rgbPoints.img3d_geo.setAttribute('color', new $.Float32BufferAttribute(_colors, 3));
+              this.rgbPoints.img3d_geo.attributes.color.needsUpdate = true;
+  
+              const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex]
+                .reduce((acc, cur) => acc.add(cur), new $.Vector3())
+                .divideScalar(this.kCentroidPoints.pixelsChildPos[_closestCentroidIndex].length);
+      
+              this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
+              resolve();
+            }, p*this.kmeanSpeed));
+          }))
         }
 
-        for (let k = 0; k < this.kCentroidPoints.pointNumber; k++) {
-          // this.kmeanTimeout.push(setTimeout(() => {
-            const _centroidNewPos: $.Vector3 = this.kCentroidPoints.pixelsChildPos[k]
-              .reduce((acc, cur) => acc.add(cur), new $.Vector3())
-              .divideScalar(this.kCentroidPoints.pixelsChildPos[k].length);
-
-            if (_centroidNewPos.equals(this.kCentroidPoints.pointsPosition[k])) {
-              _hasChanged = false;
-            } else {
-              this.kCentroidPoints.setCentroidPos(_centroidNewPos, k);
-              _hasChanged = true;
-            }
-          // }, 1));
-        }
-
-        this.draw2Canvas(_colors, this.kmeanCanvas);
-        console.log(_iteration)
-        if (!_hasChanged) return;
-      // }, 1));
+        await Promise.all(_timeoutPromies).then(() =>
+          this.draw2Canvas(_colors, this.kmeanCanvas)
+        );
+        
+        // if (!_hasChanged) return;
+      }, _iteration * this.rgbPoints.pixel_count * this.kmeanSpeed * 1.15));
     }
     console.log("done")
   }

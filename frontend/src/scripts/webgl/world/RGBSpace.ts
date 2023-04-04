@@ -71,14 +71,14 @@ export default class RGBSpace {
   private labelGGridPoints: Array<THREE.Vector3>;
   private labelBGridPoints: Array<THREE.Vector3>;
 
-  private kmeanCanvas: HTMLCanvasElement;
+  public kmeanCanvas: HTMLCanvasElement;
 
-  private kmeanTimeout: Array<number>;
-  private kmeanSpeed: number;
+  public kmeanTimeout: Array<number>;
+  public kmeanSpeed: number;
 
   constructor() {
     this.rgbPoints = new RGBPoints();
-    this.kCentroidPoints = new KCentroidPoints(3, this.rgbPoints.img3d_positions_v3);
+    this.kCentroidPoints = new KCentroidPoints(3, this.rgbPoints.img3d_positions_v3, "plusplus");
 
     this.group = new $.Group();
 
@@ -146,6 +146,8 @@ export default class RGBSpace {
   }
 
   private init() {
+    this.kmeanCanvas.style.height = "0px";
+
     this.rGroup.add(this.rSegments, this.rPlane, this.rAxis, this.meshUIRAxis);
     this.gGroup.add(this.gSegments, this.gPlane, this.gAxis, this.meshUIGAxis);
     this.bGroup.add(this.bSegments, this.bPlane, this.bAxis, this.meshUIBAxis);
@@ -238,7 +240,7 @@ export default class RGBSpace {
       
               // this.kCentroidPoints.setCentroidPos(_centroidNewPos, _closestCentroidIndex);
               resolve();
-            }, p*this.kmeanSpeed));
+            }, p*this.kCentroidPoints.pointNumber*this.kmeanSpeed));
           }))
         }
 
@@ -261,9 +263,8 @@ export default class RGBSpace {
           if (!_hasChanged) return;
         });
         
-      }, _iteration * this.rgbPoints.pixel_count * this.kmeanSpeed * 1.15));
+      }, _iteration * this.rgbPoints.pixel_count * this.kCentroidPoints.pointNumber * this.kmeanSpeed * 1.1));
     }
-    console.log("done")
   }
 
   public draw2Canvas(matrix: Array<number>, canvas: HTMLCanvasElement) {

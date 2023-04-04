@@ -1,5 +1,6 @@
 import * as $ from "three";
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { randFloat } from "three/src/math/MathUtils";
 
 export default class KCentroidPoints {
   private COLORS: Array<$.Color>;
@@ -17,7 +18,7 @@ export default class KCentroidPoints {
 
   private pointsLabelObj: Array<CSS2DObject>;
 
-  constructor(numberCentroid: number, pixelsPos: Array<$.Vector3>) {
+  constructor(numberCentroid: number, pixelsPos: Array<$.Vector3>, initMethod: 'random' | 'forgy' | 'plusplus') {
     this.pointNumber = numberCentroid;
     this.pixelsPos = pixelsPos;
     this.COLORS = [
@@ -33,11 +34,21 @@ export default class KCentroidPoints {
       new $.Color(0xFDDE99),
       new $.Color(0xD0E6A9),
       new $.Color(0x90E3CF),
+      new $.Color(0x403F56),
+      new $.Color(0xC62828),
+      new $.Color(0x7E4BAD),
+      new $.Color(0x1C7BA1),
+      new $.Color(0xBE6D93),
+      new $.Color(0x41926C),
+      new $.Color(0x742092),
+      new $.Color(0xC858BA),
+      new $.Color(0xED897F),
+      new $.Color(0x5193B3),
     ];
 
     this.group = new $.Group();
     this.pointsColor = this.initColors();
-    this.pointGeometry = new $.SphereGeometry(0.5, 32, 16);
+    this.pointGeometry = new $.SphereGeometry(0.2, 32, 16);
     this.pointMaterial = new $.MeshBasicMaterial({
       color: new $.Color(0xffffff),
       side: $.DoubleSide,
@@ -45,7 +56,15 @@ export default class KCentroidPoints {
       opacity: 0.8,
     });
     this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
-    this.pointsPosition = this.initPosPlusPlus();
+
+    if (initMethod == "plusplus") {
+      this.pointsPosition = this.initPosPlusPlus();
+    } else if (initMethod == "forgy") {
+      this.pointsPosition = this.initPosForgy();
+    } else {
+      this.pointsPosition = this.initPosRandom();
+    }
+    
     this.pointsLabelObj = this.initLabelsObj();
     this.pixelsChildPos = this.initPixelsChildPos();
 
@@ -54,7 +73,38 @@ export default class KCentroidPoints {
 
   private init() {
     this.configData();
-    this.addToSpace();
+  }
+
+  public reCreateCentroid(centroidNumber: number, initMethod: 'random' | 'forgy' | 'plusplus') {
+    this.removeFromSpace();
+
+    this.pointNumber = centroidNumber;
+    this.pointsColor = this.initColors();
+    if (initMethod == "plusplus") {
+      this.pointsPosition = this.initPosPlusPlus();
+    } else if (initMethod == "forgy") {
+      this.pointsPosition = this.initPosForgy();
+    } else {
+      this.pointsPosition = this.initPosRandom();
+    }
+    this.pointsLabelObj = this.initLabelsObj();
+    this.pixelsChildPos = this.initPixelsChildPos();
+    this.pointsMesh = new $.InstancedMesh(this.pointGeometry, this.pointMaterial, this.pointNumber);
+    this.configData();
+  }
+
+  public createUICluster(): string {
+    let _content = "";
+    this.pointsColor.forEach((_color: $.Color, _index) => {
+      _content += `
+      <div>
+        Cluster ${_index}
+        <span class="ms-5 px-5" style="background-color: #${_color.getHexString()}"></span>
+      </div>
+      `
+    })
+
+    return _content;
   }
 
   public initPosRandom(): Array<$.Vector3> {
@@ -83,8 +133,6 @@ export default class KCentroidPoints {
   }
 
   public initPosPlusPlus() {
-    const _instant = [];
-
     const getDistance = (pointA: $.Vector3, pointB: $.Vector3): number => {
       return pointA.distanceTo(pointB);
     }

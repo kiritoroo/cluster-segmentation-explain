@@ -72,9 +72,23 @@ export default class RGBPoints {
 
   private init() {
     this.configData();
-    this.setPixelsColorDefault();
 
     this.group.add(this.img3d_mesh);
+  }
+
+  public reCreatePoints(image: string) {
+
+    this.img_texture = this.resources.items[image] as $.Texture;
+    this.img_data = getImageTexture(this.img_texture.image, 0.3);
+    this.img_rgba = this.img_data.data;
+    this.img_width = this.img_data.width;
+    this.img_height = this.img_data.height;
+    this.pixel_count = this.img_width * this.img_height;
+    this.img_rgb = new Uint8ClampedArray(this.pixel_count*3);
+
+
+    this.configData();
+    this.setPixelsColors();
   }
 
   public setPixelsColorDefault() {
@@ -97,6 +111,10 @@ export default class RGBPoints {
   }
 
   private configData() {
+    this.img3d_positions = [];
+    this.img3d_positions_v3 = [];
+    this.img3d_colors = [];
+    this.img3d_colors_v3 = [];
     for (let y = 0; y < this.img_height; y++) {
       for (let x = 0; x < this.img_width; x++) {
         const _index = (y * this.img_width + x);

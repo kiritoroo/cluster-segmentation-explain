@@ -8,12 +8,88 @@
   </head>
   <body>
 
-    <div class="absolute object-contain top-0 left-5 p-5 h-screen z-10">
-      <div class="my-auto bg-white shadow-xl px-5 py-5 flex flex-col items-center justify-center">
+    <div class="absolute object-contain top-0 left-0 p-5 h-screen z-10">
+      <div class="mx-5 my-auto bg-white shadow-xl p-5">
+        <div class="flex flex-row justify-center gap-5">
+          <button type="button" id="button-kmean-play" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-indigo-700 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Play
+          </button>
+          <button type="button" id="button-kmean-reset" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-indigo-700 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Reset
+          </button>
+        </div>
+
+        <div class="my-2 flex flex-row gap-x-5 items-center justify-between">
+          <label for="input-iteration" class="block mb-2 text-sm font-medium text-gray-900 dark:text-black">
+            Iteration
+          </label>
+          <input type="number" id="input-iteration" value="1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-20 p-2.5 dark:bg-indigo-100 dark:border-gray-600 dark:placeholder-gray-400 dark:indigo-800 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="3" pattern="[0-9]{1}" required>
+        </div>
+
+        <div class="my-2 flex flex-row gap-x-5 items-center justify-between">
+          <label for="input-speed" class="block mb-2 text-sm font-medium text-gray-900 dark:text-black">
+            Speed
+          </label>
+          <input type="number" id="input-speed" value="1" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-20 p-2.5 dark:bg-indigo-100 dark:border-gray-600 dark:placeholder-gray-400 dark:indigo-800 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="3" pattern="[0-9]{1}" required>
+        </div>
+
+        <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700">
+
+        <div class="my-2 flex flex-row gap-x-5 items-center justify-between">
+          <label for="input-kcentroid" class="block mb-2 text-sm font-medium text-gray-900 dark:text-black">
+            No. Centroid 
+          </label>
+          <input type="number" id="input-kcentroid" value="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-20 p-2.5 dark:bg-purple-200 dark:border-gray-600 dark:placeholder-gray-400 dark:purple-800 dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="3" pattern="[0-9]{1}" required>
+        </div>
+
+        <div class="flex flex-col justify-center gap-5">
+
+        </div>
+
+        <div class="flex flex-col justify-center items-center">
+          <div class="mb-3">
+            <select id="option-initcentroid" data-te-select-init>
+              <option value="random">Init Random</option>
+              <option value="forgy">Init Forgy</option>
+              <option selected value="plusplus">Init PlusPlus</option>
+            </select>
+          </div>
+
+          <button type="button" id="button-createcentroid" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
+            Create Centroid
+          </button>
+        </div>
+
+        <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700">
+
+        <div class="flex flex-col justify-center items-center">
+          <div class="mb-5">
+            <select id="option-image-input" data-te-select-init>
+              <option value="demo">Picture 1</option>
+              <option value="demo2">Picture 2</option>
+              <option value="demo3">Picture 3</option>
+              <option value="demo4">Picture 4</option>
+            </select>
+          </div>
+
+          <figure class="max-w-lg">
+            <img id="image-view" class="h-auto w-60 rounded-lg" src="./public/static/textures/demo.jpg" alt="image description">
+            <figcaption id="image-caption" class="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">32 x 32 pixel</figcaption>
+          </figure>
+        </div>
+          
+      </div>
+    </div>
+
+
+    <div id="container-kmean-result" style="transition: all 0.2s ease-in-out;" class="absolute object-contain top-0 right-5 p-5 h-screen z-10">
+      <div class="my-auto bg-white shadow-xl px-5 py-5 flex flex-col items-center justify-center" style="background-color: rgba(250, 250, 250, 0.5); backdrop-filter: blur(5px);">
         <canvas id="kmean-canvas" class="" style="width: 400px; height: 400px;"></canvas>
-        <button type="button" id="button-kmean-play" class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">
-          K Mean
-        </button>
+        <div class="p-5 flex flex-col justify-center items-center">
+          <div id="container-cluster" class="flex flex-col justify-center items-center gap-2">
+          </div>
+          <h5 class="my-5 text-xl font-bold tracking-tight text-purple-900 dark:text-purple-800">K Mean</h5>
+        </div>
       </div>
     </div>
 
